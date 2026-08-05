@@ -1,0 +1,9 @@
+{
+  "name": "Hermes Workspace",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "install": "bash .cursor/scripts/cloud-install.sh",
+  "start": "bash .cursor/scripts/cloud-bootstrap-env.sh && export PATH=\"$HOME/.local/bin:$PATH\" && exec pnpm exec concurrently -n gateway,dashboard,workspace -c blue,green,magenta \"hermes gateway run\" \"hermes dashboard --port 9119 --host 127.0.0.1 --no-open\" \"pnpm dev\""
+}
