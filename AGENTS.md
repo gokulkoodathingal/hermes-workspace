@@ -26,6 +26,17 @@ This workspace uses semantic Hermes swarm workers, not numbered-only lanes. The 
 - For local Workspace pairing/debugging, treat **one gateway + one dashboard** as canonical: `hermes gateway run` on `:8642` and `hermes dashboard` on `:9119`. Before starting another gateway, verify `curl http://127.0.0.1:3000/api/sessions` (or the active workspace port) first. If Sessions already returns data, refresh/reprobe the UI instead of spawning a duplicate gateway.
 - If the default model is `gpt-5.4` / `openai-codex`, remember that chat depends on a live local Codex CLI login (`codex login`).
 
+## Cursor Cloud specific instructions
+
+Cloud Agent environments use `.cursor/environment.json` (`cloud-install.sh` + `cloud-start.sh`) to bootstrap the full dev stack.
+
+- **Canonical three-service dev stack**: gateway `:8642`, dashboard `:9119`, workspace `:3000`. The start script launches all three idempotently; do not spawn duplicates if health checks already pass.
+- **Gateway API server**: Hermes Agent 0.19+ requires `API_SERVER_ENABLED=true`, `API_SERVER_KEY`, and the `aiohttp` pip package before `:8642/health` responds. The start script sets a loopback dev key and mirrors it to `HERMES_API_TOKEN` in the workspace `.env`.
+- **Health checks**: `curl -H "Authorization: Bearer $HERMES_API_TOKEN" http://127.0.0.1:8642/health`, `curl http://127.0.0.1:9119/api/status`, `curl http://127.0.0.1:3000/api/sessions`.
+- **Lint / test / build**: see `package.json` — `pnpm lint`, `pnpm test` (Vitest, no external services), `pnpm build`. Typecheck: `pnpm exec tsc --noEmit`.
+- **Chat E2E** needs an LLM provider key in `.env` or `~/.hermes/.env`; UI/navigation/sessions work without one.
+- **Service logs** (if manually debugging): `~/.hermes/logs/{gateway,dashboard,workspace}.log`.
+
 ## Windows-specific notes (2026-06-01)
 
 - **Three services required**: Gateway (:8642) + Dashboard (:9119) + Workspace (:3000). All must be running for full functionality.
