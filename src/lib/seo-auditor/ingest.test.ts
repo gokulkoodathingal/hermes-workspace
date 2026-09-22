@@ -27,6 +27,7 @@ describe('ingestPage', () => {
     expect(fetcher).toHaveBeenCalledWith(
       'https://example.com/start',
       expect.objectContaining({
+        dispatcher: expect.anything(),
         redirect: 'manual',
         headers: expect.objectContaining({
           accept: expect.stringContaining('text/html'),

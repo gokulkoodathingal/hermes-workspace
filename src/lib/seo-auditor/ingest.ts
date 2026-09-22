@@ -1,5 +1,7 @@
 import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
+import { Agent } from 'undici'
+import type { Dispatcher } from 'undici'
 
 export type IngestedPage = {
   requestedUrl: string
@@ -11,13 +13,16 @@ export type IngestedPage = {
 
 export type PageIngestionOptions = {
   allowPrivateHosts?: boolean
-  fetcher?: typeof fetch
+  fetcher?: PageFetcher
   maxBytes?: number
   maxRedirects?: number
   resolveHost?: (hostname: string) => Promise<Array<string>>
   timeoutMs?: number
   userAgent?: string
 }
+
+type PageRequestInit = RequestInit & { dispatcher?: Dispatcher }
+type PageFetcher = (input: string, init: PageRequestInit) => Promise<Response>
 
 const DEFAULT_MAX_BYTES = 2_000_000
 const DEFAULT_MAX_REDIRECTS = 5
@@ -128,7 +133,7 @@ async function defaultResolveHost(hostname: string): Promise<Array<string>> {
 async function assertPublicTarget(
   url: URL,
   resolveHost: (hostname: string) => Promise<Array<string>>,
-): Promise<void> {
+): Promise<Array<string>> {
   const normalizedHostname = url.hostname.replace(/^\[|\]$/g, '')
   const addresses = isIP(normalizedHostname)
     ? [normalizedHostname]
@@ -141,6 +146,26 @@ async function assertPublicTarget(
       `Refusing to fetch non-public address for "${url.hostname}"`,
     )
   }
+  return addresses
+}
+
+function createPinnedDispatcher(addresses: Array<string>): Agent {
+  return new Agent({
+    connect: {
+      lookup(_hostname, lookupOptions, callback) {
+        const records = addresses.map((address) => ({
+          address,
+          family: isIP(address),
+        }))
+        if (lookupOptions.all) {
+          callback(null, records)
+          return
+        }
+        const first = records[0]
+        callback(null, first.address, first.family)
+      },
+    },
+  })
 }
 
 async function readBoundedBody(
@@ -179,71 +204,82 @@ export async function ingestPage(
   options: PageIngestionOptions = {},
 ): Promise<IngestedPage> {
   const requestedUrl = validateUrl(input)
-  const fetcher = options.fetcher ?? fetch
+  const fetcher: PageFetcher =
+    options.fetcher ?? ((url, init) => fetch(url, init))
   const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES
   const maxRedirects = options.maxRedirects ?? DEFAULT_MAX_REDIRECTS
   const resolveHost = options.resolveHost ?? defaultResolveHost
   let currentUrl = requestedUrl
   let response: Response | undefined
+  const dispatchers: Array<Agent> = []
 
-  for (
-    let redirectCount = 0;
-    redirectCount <= maxRedirects;
-    redirectCount += 1
-  ) {
-    if (!options.allowPrivateHosts) {
-      await assertPublicTarget(currentUrl, resolveHost)
+  try {
+    for (
+      let redirectCount = 0;
+      redirectCount <= maxRedirects;
+      redirectCount += 1
+    ) {
+      const addresses = options.allowPrivateHosts
+        ? []
+        : await assertPublicTarget(currentUrl, resolveHost)
+      const dispatcher =
+        addresses.length > 0 ? createPinnedDispatcher(addresses) : undefined
+      if (dispatcher) dispatchers.push(dispatcher)
+
+      response = await fetcher(currentUrl.toString(), {
+        dispatcher,
+        redirect: 'manual',
+        signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
+        headers: {
+          accept: 'text/html,application/xhtml+xml;q=0.9',
+          'user-agent':
+            options.userAgent ??
+            'Hermes-OnPage-SEO-Auditor/1.0 (+https://github.com/gokulkoodathingal/hermes-workspace)',
+        },
+      })
+
+      if (!REDIRECT_STATUSES.has(response.status)) break
+      const location = response.headers.get('location')
+      await response.body?.cancel()
+      if (!location) {
+        throw new Error(
+          `Redirect response ${response.status} is missing a location header`,
+        )
+      }
+      if (redirectCount === maxRedirects) {
+        throw new Error(`Page exceeded the ${maxRedirects} redirect limit`)
+      }
+      currentUrl = validateUrl(new URL(location, currentUrl).toString())
     }
-    response = await fetcher(currentUrl.toString(), {
-      redirect: 'manual',
-      signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
-      headers: {
-        accept: 'text/html,application/xhtml+xml;q=0.9',
-        'user-agent':
-          options.userAgent ??
-          'Hermes-OnPage-SEO-Auditor/1.0 (+https://github.com/gokulkoodathingal/hermes-workspace)',
-      },
-    })
 
-    if (!REDIRECT_STATUSES.has(response.status)) break
-    const location = response.headers.get('location')
-    await response.body?.cancel()
-    if (!location) {
+    if (!response) throw new Error('Page request did not return a response')
+
+    if (!response.ok) {
+      throw new Error(`Page request failed with HTTP ${response.status}`)
+    }
+
+    const contentType = response.headers.get('content-type') ?? ''
+    if (!/^(text\/html|application\/xhtml\+xml)(?:;|$)/i.test(contentType)) {
       throw new Error(
-        `Redirect response ${response.status} is missing a location header`,
+        `Expected an HTML response, received "${contentType || 'unknown'}"`,
       )
     }
-    if (redirectCount === maxRedirects) {
-      throw new Error(`Page exceeded the ${maxRedirects} redirect limit`)
+
+    const declaredLength = Number(response.headers.get('content-length'))
+    if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+      throw new Error(`Page exceeds the ${maxBytes} byte limit`)
     }
-    currentUrl = validateUrl(new URL(location, currentUrl).toString())
-  }
 
-  if (!response) throw new Error('Page request did not return a response')
+    const bytes = await readBoundedBody(response, maxBytes)
 
-  if (!response.ok) {
-    throw new Error(`Page request failed with HTTP ${response.status}`)
-  }
-
-  const contentType = response.headers.get('content-type') ?? ''
-  if (!/^(text\/html|application\/xhtml\+xml)(?:;|$)/i.test(contentType)) {
-    throw new Error(
-      `Expected an HTML response, received "${contentType || 'unknown'}"`,
-    )
-  }
-
-  const declaredLength = Number(response.headers.get('content-length'))
-  if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
-    throw new Error(`Page exceeds the ${maxBytes} byte limit`)
-  }
-
-  const bytes = await readBoundedBody(response, maxBytes)
-
-  return {
-    requestedUrl: requestedUrl.toString(),
-    finalUrl: currentUrl.toString(),
-    status: response.status,
-    contentType,
-    html: new TextDecoder().decode(bytes),
+    return {
+      requestedUrl: requestedUrl.toString(),
+      finalUrl: currentUrl.toString(),
+      status: response.status,
+      contentType,
+      html: new TextDecoder().decode(bytes),
+    }
+  } finally {
+    await Promise.all(dispatchers.map((dispatcher) => dispatcher.close()))
   }
 }

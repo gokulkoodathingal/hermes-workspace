@@ -57,8 +57,9 @@ Configuration:
 
 Do not commit credentials. Deterministic mode is the default and never calls an LLM API.
 The fetcher accepts only HTTP(S) HTML responses, validates resolved addresses and every
-redirect target, times out after 10 seconds, and stops reading response bodies once they
-exceed 2 MB.
+redirect target, pins each connection to its validated addresses to prevent DNS
+rebinding, times out after 10 seconds, and stops reading response bodies once they exceed
+2 MB.
 
 ## Output
 
