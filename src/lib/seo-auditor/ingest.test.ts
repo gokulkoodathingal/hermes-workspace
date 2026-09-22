@@ -115,6 +115,12 @@ describe('ingestPage', () => {
         resolveHost: () => Promise.resolve(['10.0.0.8']),
       }),
     ).rejects.toThrow('non-public address')
+    await expect(
+      ingestPage('http://[64:ff9b:1::1]/admin', { fetcher }),
+    ).rejects.toThrow('non-public address')
+    await expect(
+      ingestPage('http://[2001:db8::1]/admin', { fetcher }),
+    ).rejects.toThrow('non-public address')
     expect(fetcher).not.toHaveBeenCalled()
   })
 
