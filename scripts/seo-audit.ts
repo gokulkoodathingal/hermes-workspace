@@ -15,7 +15,7 @@ Options:
 }
 
 async function main(): Promise<void> {
-  const args = process.argv.slice(2)
+  const args = process.argv.slice(2).filter((arg) => arg !== '--')
   if (args.includes('--help') || args.includes('-h')) {
     console.log(usage())
     return
