@@ -1,6 +1,6 @@
 import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
-import { Agent } from 'undici'
+import { Agent, fetch as undiciFetch } from 'undici'
 import type { Dispatcher } from 'undici'
 
 export type IngestedPage = {
@@ -21,8 +21,29 @@ export type PageIngestionOptions = {
   userAgent?: string
 }
 
-type PageRequestInit = RequestInit & { dispatcher?: Dispatcher }
-type PageFetcher = (input: string, init: PageRequestInit) => Promise<Response>
+type PageBody = {
+  cancel: (reason?: unknown) => Promise<void>
+  getReader: () => {
+    cancel: (reason?: unknown) => Promise<void>
+    read: () => Promise<{ done: boolean; value?: Uint8Array }>
+  }
+}
+type PageResponse = {
+  body: PageBody | null
+  headers: { get: (name: string) => string | null }
+  ok: boolean
+  status: number
+}
+type PageRequestInit = {
+  dispatcher?: Dispatcher
+  headers: Record<string, string>
+  redirect: 'manual'
+  signal: AbortSignal
+}
+type PageFetcher = (
+  input: string,
+  init: PageRequestInit,
+) => Promise<PageResponse>
 
 const DEFAULT_MAX_BYTES = 2_000_000
 const DEFAULT_MAX_REDIRECTS = 5
@@ -169,7 +190,7 @@ function createPinnedDispatcher(addresses: Array<string>): Agent {
 }
 
 async function readBoundedBody(
-  response: Response,
+  response: PageResponse,
   maxBytes: number,
 ): Promise<Uint8Array> {
   if (!response.body) return new Uint8Array()
@@ -181,6 +202,10 @@ async function readBoundedBody(
   let result = await reader.read()
   while (!result.done) {
     const { value } = result
+    if (!value) {
+      result = await reader.read()
+      continue
+    }
     totalBytes += value.byteLength
     if (totalBytes > maxBytes) {
       await reader.cancel()
@@ -205,12 +230,12 @@ export async function ingestPage(
 ): Promise<IngestedPage> {
   const requestedUrl = validateUrl(input)
   const fetcher: PageFetcher =
-    options.fetcher ?? ((url, init) => fetch(url, init))
+    options.fetcher ?? ((url, init) => undiciFetch(url, init))
   const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES
   const maxRedirects = options.maxRedirects ?? DEFAULT_MAX_REDIRECTS
   const resolveHost = options.resolveHost ?? defaultResolveHost
   let currentUrl = requestedUrl
-  let response: Response | undefined
+  let response: PageResponse | undefined
   const dispatchers: Array<Agent> = []
 
   try {
