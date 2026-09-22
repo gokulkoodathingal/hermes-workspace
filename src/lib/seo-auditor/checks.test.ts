@@ -77,6 +77,8 @@ describe('auditHtml', () => {
         <h1>Short visible page</h1>
         <p>Only these visible words should count.</p>
         <script>${'hidden script words '.repeat(200)}</script>
+        <template><h1>Hidden template heading</h1></template>
+        <noscript><h1>Hidden fallback heading</h1></noscript>
         <img src="/decoration.svg" alt="">
         <a href="/next">Next</a>
       </body>
@@ -85,12 +87,16 @@ describe('auditHtml', () => {
     const result = auditHtml(html, 'https://example.com/page')
 
     expect(result.metrics.wordCount).toBeLessThan(20)
+    expect(result.metrics.h1Count).toBe(1)
     expect(result.metrics.imagesMissingAlt).toBe(0)
     expect(result.findings.map((finding) => finding.id)).toContain(
       'thin-content',
     )
     expect(result.findings.map((finding) => finding.id)).not.toContain(
       'image-alt',
+    )
+    expect(result.findings.map((finding) => finding.id)).not.toContain(
+      'h1-count',
     )
   })
 })

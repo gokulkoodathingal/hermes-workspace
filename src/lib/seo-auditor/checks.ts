@@ -21,9 +21,9 @@ export function auditHtml(
   const description = normalizeText(
     $('meta[name="description"]').first().attr('content') ?? '',
   )
+  $('script, style, noscript, template').remove()
   const h1Count = $('h1').length
   const h2Count = $('h2').length
-  $('script, style, noscript, template').remove()
   const bodyText = normalizeText($('body').text())
   const wordCount = bodyText ? bodyText.split(/\s+/).length : 0
   const images = $('img')
