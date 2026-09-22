@@ -37,15 +37,16 @@ async function readBoundedBody(
   const chunks: Array<Uint8Array> = []
   let totalBytes = 0
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
+  let result = await reader.read()
+  while (!result.done) {
+    const { value } = result
     totalBytes += value.byteLength
     if (totalBytes > maxBytes) {
       await reader.cancel()
       throw new Error(`Page exceeds the ${maxBytes} byte limit`)
     }
     chunks.push(value)
+    result = await reader.read()
   }
 
   const body = new Uint8Array(totalBytes)
