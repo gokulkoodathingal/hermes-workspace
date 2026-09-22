@@ -31,6 +31,14 @@ pnpm install
 pnpm seo:audit -- https://example.com/page --pretty
 ```
 
+Public destinations are required by default. This prevents untrusted URLs and redirects
+from reaching loopback, private-network, link-local, or cloud metadata addresses. For a
+trusted local development page, opt in explicitly:
+
+```bash
+pnpm seo:audit -- http://127.0.0.1:3000/page --allow-private --pretty
+```
+
 Enable the LangChain analysis layer explicitly:
 
 ```bash
@@ -48,8 +56,9 @@ Configuration:
 | `OPENAI_BASE_URL`   | No                | OpenAI API     | OpenAI-compatible endpoint              |
 
 Do not commit credentials. Deterministic mode is the default and never calls an LLM API.
-The fetcher accepts only HTTP(S) HTML responses, times out after 10 seconds, and rejects
-response bodies larger than 2 MB.
+The fetcher accepts only HTTP(S) HTML responses, validates resolved addresses and every
+redirect target, times out after 10 seconds, and stops reading response bodies once they
+exceed 2 MB.
 
 ## Output
 
