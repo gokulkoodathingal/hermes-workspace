@@ -63,4 +63,34 @@ describe('auditHtml', () => {
     )
     expect(result.score).toBeLessThan(70)
   })
+
+  it('excludes non-visible elements and accepts decorative empty alt text', () => {
+    const html = `<html lang="en">
+      <head>
+        <title>A sufficiently descriptive title for the test page</title>
+        <meta name="description" content="${'A useful description. '.repeat(8)}">
+        <meta name="viewport" content="width=device-width">
+        <link rel="canonical" href="https://example.com/page">
+        <style>${'hidden style words '.repeat(200)}</style>
+      </head>
+      <body>
+        <h1>Short visible page</h1>
+        <p>Only these visible words should count.</p>
+        <script>${'hidden script words '.repeat(200)}</script>
+        <img src="/decoration.svg" alt="">
+        <a href="/next">Next</a>
+      </body>
+    </html>`
+
+    const result = auditHtml(html, 'https://example.com/page')
+
+    expect(result.metrics.wordCount).toBeLessThan(20)
+    expect(result.metrics.imagesMissingAlt).toBe(0)
+    expect(result.findings.map((finding) => finding.id)).toContain(
+      'thin-content',
+    )
+    expect(result.findings.map((finding) => finding.id)).not.toContain(
+      'image-alt',
+    )
+  })
 })

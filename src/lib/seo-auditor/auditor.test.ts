@@ -84,4 +84,40 @@ describe('runSeoAudit', () => {
       ),
     ).rejects.toThrow()
   })
+
+  it('does not send script or style content to the analyzer', async () => {
+    const analyzer = vi.fn(() =>
+      Promise.resolve({
+        summary: 'Grounded summary',
+        searchIntent: 'Informational',
+        strengths: [],
+        opportunities: [],
+      }),
+    )
+
+    await runSeoAudit(
+      {
+        requestedUrl: 'https://example.com/page',
+        finalUrl: 'https://example.com/page',
+        status: 200,
+        contentType: 'text/html',
+        html: html.replace(
+          '</body>',
+          '<script>privateRuntimeToken</script><style>hiddenStyleRule</style></body>',
+        ),
+      },
+      { analyzer },
+    )
+
+    expect(analyzer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visibleTextExcerpt: expect.not.stringContaining('privateRuntimeToken'),
+      }),
+    )
+    expect(analyzer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visibleTextExcerpt: expect.not.stringContaining('hiddenStyleRule'),
+      }),
+    )
+  })
 })

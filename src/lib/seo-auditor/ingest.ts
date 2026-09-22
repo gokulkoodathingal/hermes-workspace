@@ -27,6 +27,36 @@ function validateUrl(input: string): URL {
   return url
 }
 
+async function readBoundedBody(
+  response: Response,
+  maxBytes: number,
+): Promise<Uint8Array> {
+  if (!response.body) return new Uint8Array()
+
+  const reader = response.body.getReader()
+  const chunks: Array<Uint8Array> = []
+  let totalBytes = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    totalBytes += value.byteLength
+    if (totalBytes > maxBytes) {
+      await reader.cancel()
+      throw new Error(`Page exceeds the ${maxBytes} byte limit`)
+    }
+    chunks.push(value)
+  }
+
+  const body = new Uint8Array(totalBytes)
+  let offset = 0
+  for (const chunk of chunks) {
+    body.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return body
+}
+
 export async function ingestPage(
   input: string,
   options: PageIngestionOptions = {},
@@ -61,10 +91,7 @@ export async function ingestPage(
     throw new Error(`Page exceeds the ${maxBytes} byte limit`)
   }
 
-  const bytes = new Uint8Array(await response.arrayBuffer())
-  if (bytes.byteLength > maxBytes) {
-    throw new Error(`Page exceeds the ${maxBytes} byte limit`)
-  }
+  const bytes = await readBoundedBody(response, maxBytes)
 
   return {
     requestedUrl: url.toString(),

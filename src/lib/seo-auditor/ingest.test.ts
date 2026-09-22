@@ -62,4 +62,35 @@ describe('ingestPage', () => {
       }),
     ).rejects.toThrow('exceeds the 10 byte limit')
   })
+
+  it('cancels a streamed response as soon as it exceeds the byte limit', async () => {
+    let cancelled = false
+    let chunksRead = 0
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        chunksRead += 1
+        controller.enqueue(new TextEncoder().encode('123456'))
+        if (chunksRead === 3) controller.close()
+      },
+      cancel() {
+        cancelled = true
+      },
+    })
+
+    await expect(
+      ingestPage('https://example.com/stream', {
+        maxBytes: 5,
+        fetcher: () =>
+          Promise.resolve(
+            new Response(body, {
+              status: 200,
+              headers: { 'content-type': 'text/html' },
+            }),
+          ),
+      }),
+    ).rejects.toThrow('exceeds the 5 byte limit')
+
+    expect(cancelled).toBe(true)
+    expect(chunksRead).toBeLessThan(3)
+  })
 })

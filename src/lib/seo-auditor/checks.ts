@@ -23,12 +23,13 @@ export function auditHtml(
   )
   const h1Count = $('h1').length
   const h2Count = $('h2').length
+  $('script, style, noscript, template').remove()
   const bodyText = normalizeText($('body').text())
   const wordCount = bodyText ? bodyText.split(/\s+/).length : 0
   const images = $('img')
   const imagesMissingAlt = images
     .toArray()
-    .filter((image) => !($(image).attr('alt') ?? '').trim()).length
+    .filter((image) => $(image).attr('alt') === undefined).length
 
   let internalLinkCount = 0
   let externalLinkCount = 0
@@ -138,7 +139,7 @@ export function auditHtml(
       id: 'image-alt',
       severity: 'warning',
       title: 'Images are missing alternative text',
-      evidence: `${imagesMissingAlt} of ${images.length} images have missing or empty alt text.`,
+      evidence: `${imagesMissingAlt} of ${images.length} images have no alt attribute.`,
       recommendation:
         'Add descriptive alt text, or use alt="" only for decorative images.',
     })

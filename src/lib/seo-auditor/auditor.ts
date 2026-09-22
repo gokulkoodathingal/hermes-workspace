@@ -26,6 +26,7 @@ function compactPageEvidence(
 ): SeoAnalysisInput {
   const $ = cheerio.load(page.html)
   const normalize = (value: string) => value.replace(/\s+/g, ' ').trim()
+  $('script, style, noscript, template').remove()
 
   return {
     url: page.finalUrl,
