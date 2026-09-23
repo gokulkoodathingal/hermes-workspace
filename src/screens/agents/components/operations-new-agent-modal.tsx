@@ -5,7 +5,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@/components/ui/button'
 import { fetchModels, type GatewayModelCatalogEntry } from '@/lib/gateway-api'
 import { cn } from '@/lib/utils'
-import { AGENT_PRESETS } from '../agent-presets'
+import { listVisibleAgentPresets } from '../agent-presets'
 
 type PresetOption = {
   id: string
@@ -23,15 +23,7 @@ const PRESET_OPTIONS: PresetOption[] = [
     description: '',
     systemPrompt: '',
   },
-  ...Object.entries(AGENT_PRESETS)
-    .filter(([id]) => !id.startsWith('pc1-'))
-    .map(([id, preset]) => ({
-      id,
-      name: id.charAt(0).toUpperCase() + id.slice(1),
-      emoji: preset.emoji,
-      description: preset.description,
-      systemPrompt: preset.systemPrompt,
-    })),
+  ...listVisibleAgentPresets(),
 ]
 
 type AvailableModel = {
