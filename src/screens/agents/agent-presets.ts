@@ -1,3 +1,5 @@
+import seoAuditorSystemPrompt from '../../../prompts/seo-auditor.md?raw'
+
 /**
  * Pre-configured agent metadata for Operations screen.
  * Called on first load to populate localStorage if agents have no metadata yet.
@@ -8,6 +10,16 @@ export type AgentPreset = {
   description: string
   systemPrompt: string
   color: string
+  /** Button label in the new-agent template picker. Defaults to a capitalized id. */
+  label?: string
+}
+
+export type VisibleAgentPreset = {
+  id: string
+  name: string
+  emoji: string
+  description: string
+  systemPrompt: string
 }
 
 export const AGENT_PRESETS: Record<string, AgentPreset> = {
@@ -83,6 +95,14 @@ Style: Data-driven, concise, actionable. Every report should end with "recommend
 Output format: Structured reports with sections: Summary, Metrics, Insights, Risks, Recommended Actions. Use bullet points, not paragraphs.`,
     color: '#f59e0b',
   },
+  'seo-auditor': {
+    emoji: '🔎',
+    label: 'SEO Auditor',
+    description:
+      'On-page and answer-engine auditor with evidence-backed findings',
+    systemPrompt: seoAuditorSystemPrompt.trim(),
+    color: '#0f766e',
+  },
   trader: {
     emoji: '🎰',
     description: 'Prediction market signals & trading analyst',
@@ -120,6 +140,18 @@ Output format: Signal cards with: Market, Direction (YES/NO), Materiality (0-1),
     systemPrompt: 'You are a code and content reviewer. Find bugs, logical errors, and improvements. Be thorough but constructive.',
     color: '#f97316',
   },
+}
+
+export function listVisibleAgentPresets(): Array<VisibleAgentPreset> {
+  return Object.entries(AGENT_PRESETS)
+    .filter(([id]) => !id.startsWith('pc1-'))
+    .map(([id, preset]) => ({
+      id,
+      name: preset.label ?? id.charAt(0).toUpperCase() + id.slice(1),
+      emoji: preset.emoji,
+      description: preset.description,
+      systemPrompt: preset.systemPrompt,
+    }))
 }
 
 /**
