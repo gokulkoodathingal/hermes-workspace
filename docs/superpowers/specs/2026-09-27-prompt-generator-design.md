@@ -12,6 +12,10 @@ Create a reusable Hermes skill and a standalone copy-paste meta-prompt that turn
 2. `skills/generating-high-quality-prompts/standalone-prompt.md`
    - Contains a self-contained prompt that can be pasted into a capable language model.
    - Produces the same user-facing behavior without relying on the Hermes skill runtime.
+3. A local Cursor plugin at `~/.cursor/plugins/local/high-quality-prompt-generator/`
+   - Uses a valid `.cursor-plugin/plugin.json` manifest and default `skills/` discovery.
+   - Links its discovered skill to the repository copy so there is one source of truth.
+   - Includes local installation documentation and the MIT license.
 
 ## Behavior
 
@@ -72,10 +76,18 @@ Skill development follows a RED-GREEN-REFACTOR process:
 
 Repository checks will validate YAML frontmatter, required files, internal links, formatting, and the absence of unresolved placeholders. Test evidence will be saved under `/opt/cursor/artifacts/`.
 
+## Cursor Installation
+
+Cursor does not document a personal custom-skill upload flow in the account web dashboard. The supported local installation is a plugin under `~/.cursor/plugins/local/`; it becomes available in Cursor's Customize interface after a window reload or application restart. This local installation is specific to the current machine and does not publish the skill to a public or team marketplace.
+
+The plugin uses a symbolic link from `~/.cursor/plugins/local/high-quality-prompt-generator/skills/generating-high-quality-prompts` to `/workspace/skills/generating-high-quality-prompts`. The link keeps the committed repository files authoritative while making the skill immediately discoverable by the local Cursor profile.
+
 ## Acceptance Criteria
 
 - Both deliverables exist and are self-contained for their intended environments.
 - The skill frontmatter uses a valid kebab-case name and a trigger-only description beginning with `Use when`.
+- The local Cursor plugin manifest has a valid name and only relative component paths.
+- The plugin's discovered skill resolves to the committed repository skill.
 - Vague requests receive no more than three material clarification questions.
 - Complete requests receive one prompt without unnecessary questioning.
 - Final output contains one copy-ready prompt, not task results or multiple variants.
