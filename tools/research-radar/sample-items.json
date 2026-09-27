@@ -1,0 +1,102 @@
+{
+  "operator": "Digital marketing specialist, 12 years, learning AI, agentic AI, cybersecurity, and networking",
+  "note": "Synthetic items for the first radar. Replace this file with titles and excerpts from YouTube, blogs, GitHub, Hugging Face, and social posts you actually saved.",
+  "items": [
+    {
+      "id": "ads-ai-max",
+      "source": "youtube",
+      "title": "Google Ads expands AI Max and changes search term reporting",
+      "text": "Search term reports hide more queries. Check match types and the queries you can still see before the next budget review.",
+      "url": "https://example.com/google-ads-ai-max",
+      "author": "Example channel"
+    },
+    {
+      "id": "agent-mechanism",
+      "source": "blog",
+      "title": "What an agent is: tools, memory, and the human approval step",
+      "text": "An agentic loop picks a tool, writes memory, and must stop for a person before anything is sent or spent.",
+      "url": "https://example.com/what-is-an-agent",
+      "author": "Example blog"
+    },
+    {
+      "id": "hf-embeddings",
+      "source": "huggingface",
+      "title": "Model card: an embedding model for clustering reviews",
+      "text": "The model card describes an embedding model that groups short reviews. License and eval notes are on the card.",
+      "url": "https://example.com/review-embeddings",
+      "author": "Example org"
+    },
+    {
+      "id": "phish-meta",
+      "source": "blog",
+      "title": "Phishing pages now impersonate Meta Business Suite login",
+      "text": "The page asks for the ad account password. Check the real URL and turn on MFA before you sign in.",
+      "url": "https://example.com/meta-phish",
+      "author": "Example security desk"
+    },
+    {
+      "id": "dmarc-page",
+      "source": "blog",
+      "title": "SPF, DKIM, and DMARC in one page for marketers",
+      "text": "What to ask engineering when campaign mail lands in spam, and which DNS record proves the domain.",
+      "url": "https://example.com/dmarc-for-marketers",
+      "author": "Example deliverability"
+    },
+    {
+      "id": "hype-10x",
+      "source": "youtube",
+      "title": "10 marketing tools that will 10x your income overnight",
+      "text": "A secret hack and a guaranteed funnel. No mechanism, no date, no source.",
+      "url": "https://example.com/10x-overnight",
+      "author": "Example promo"
+    },
+    {
+      "id": "celebrity",
+      "source": "social",
+      "title": "Red carpet looks from last night's awards",
+      "text": "Outfit notes and photos. No product, no channel, no lesson.",
+      "url": "https://example.com/red-carpet",
+      "author": "Example feed"
+    },
+    {
+      "id": "wiki-dns",
+      "source": "wikipedia",
+      "title": "Domain Name System",
+      "text": "DNS resolves a name to an address. A definition page, not a campaign change.",
+      "url": "https://example.com/wiki-dns",
+      "author": "Wikipedia"
+    },
+    {
+      "id": "meta-policy",
+      "source": "search",
+      "title": "Meta ad policy update for health claims and landing pages",
+      "text": "Landing pages for health offers need clearer claims. Review active ads before the enforcement date.",
+      "url": "https://example.com/meta-health-policy",
+      "author": "Meta"
+    },
+    {
+      "id": "ga4-thread",
+      "source": "comments",
+      "title": "Marketers say GA4 attribution dropped after consent mode",
+      "text": "A thread of in-house marketers comparing consent mode settings and missing conversions in GA4.",
+      "url": "https://example.com/ga4-consent-thread",
+      "author": "Example forum"
+    },
+    {
+      "id": "g2-access",
+      "source": "reviews",
+      "title": "Reviews say onboarding asked for full ad account access",
+      "text": "Several reviews flag a tool that requests ad account admin during setup. Limit access and review the OAuth scope.",
+      "url": "https://example.com/g2-ad-account",
+      "author": "Example reviews"
+    },
+    {
+      "id": "browser-agent",
+      "source": "github",
+      "title": "A small browser agent README",
+      "text": "The README shows an agent with tool use over pages: open, read, and stop for a person before submit.",
+      "url": "https://example.com/browser-agent",
+      "author": "Example github"
+    }
+  ]
+}

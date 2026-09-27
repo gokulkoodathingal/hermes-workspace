@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "comments:mine": "node --experimental-strip-types tools/comment-miner/run.ts --input tools/comment-miner/sample-comments.json",
+    "radar": "node --experimental-strip-types tools/research-radar/run.ts --input tools/research-radar/sample-items.json",
     "smoke:managed": "node scripts/managed-companion-smoke.mjs",
     "playground:ws": "node scripts/playground-ws.mjs",
     "lint": "eslint",
