@@ -1,0 +1,97 @@
+{
+  "product": "Northstar",
+  "audience": "in-house digital marketers",
+  "note": "Synthetic comments for the first run. Replace this file with your own YouTube, review, or social export.",
+  "comments": [
+    {
+      "id": "yt-1",
+      "source": "youtube",
+      "text": "Switched from HubSpot last month. Setup took a weekend, and we cut reporting time from 6 hours to about 1."
+    },
+    {
+      "id": "g2-1",
+      "source": "g2",
+      "text": "Is this worth $49/month when I already pay for Mailchimp?"
+    },
+    {
+      "id": "yt-spam",
+      "source": "youtube",
+      "text": "DM me for a free crypto airdrop http://scam.example/join"
+    },
+    {
+      "id": "reddit-1",
+      "source": "reddit",
+      "text": "The dashboard is confusing. I still can't find where to connect Search Console."
+    },
+    {
+      "id": "reddit-2",
+      "source": "reddit",
+      "text": "Does anyone know a tool that scores a LinkedIn draft before you post it?"
+    },
+    {
+      "id": "li-1",
+      "source": "linkedin",
+      "text": "Love it!!!"
+    },
+    {
+      "id": "g2-2",
+      "source": "g2",
+      "text": "Support ghosted me for 9 days after billing failed twice."
+    },
+    {
+      "id": "reddit-3",
+      "source": "reddit",
+      "text": "This looks like a scam. Onboarding asked for my ad account password."
+    },
+    {
+      "id": "li-2",
+      "source": "linkedin",
+      "text": "We need a way to export comments into a weekly brief."
+    },
+    {
+      "id": "li-3",
+      "source": "linkedin",
+      "text": "Following! Great content"
+    },
+    {
+      "id": "g2-3",
+      "source": "g2",
+      "text": "I would switch today if the GA4 connector didn't drop UTM parameters."
+    },
+    {
+      "id": "yt-2",
+      "source": "youtube",
+      "text": "Our last campaign went from 1.2% CTR to 2.4% after we rewrote the hooks. Three weeks, same budget."
+    },
+    {
+      "id": "yt-3",
+      "source": "youtube",
+      "text": "lol"
+    },
+    {
+      "id": "reddit-4",
+      "source": "reddit",
+      "text": "Compared to Jasper this is slower, but the briefs are closer to how I actually write."
+    },
+    {
+      "id": "yt-4",
+      "source": "youtube",
+      "text": "Can it read YouTube comments, or only the transcript?"
+    },
+    {
+      "id": "li-spam",
+      "source": "linkedin",
+      "text": "Check my profile for the best agency in Dubai!!!"
+    },
+    {
+      "id": "g2-4",
+      "source": "g2",
+      "text": "The price jumped and nobody emailed. I'm cancelling at renewal."
+    },
+    {
+      "id": "reddit-5",
+      "source": "reddit",
+      "text": "Finally something that tells me which reviews are real versus affiliate spam."
+    }
+  ]
+}
